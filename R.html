@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<body>
+		<div id="container"></div>
+	</body>
+	<style>
+		*{
+			margin: 0px;
+			padding: 0px;
+		}
+		#container{
+			position: relative;
+		}
+		.box{
+			padding: 5px;
+			float:left;
+		}
+		.box_img{
+			padding: 5px;
+			border: 1px solid #cccccc;
+			box-shadow: 0 0 5px #ccc;
+			border-radius: 5px;
+		}
+		.box_img img{
+			width: 150px;
+			height:auto;
+		}
+	</style>
+	<script>
+		function $(id) {
+			return typeof id === "string" ? document.getElementById(id):null;
+		}
+		function $$(classs) {
+			return typeof classs === "string" ? document.getElementsByClassName(classs):null;
+		}
+		function pbl(container,box){
+			loadUsers((db)=>{
+				$("container").innerHTML+=db;
+				//console.log($$(box)[0].offsetWidth);
+				var BowerWidth=document.documentElement.offsetWidth;
+				var Colls=parseInt(BowerWidth / $$(box)[0].offsetWidth);
+				var pblWidth=Colls*$$(box)[0].offsetWidth;
+				$(container).style.width=pblWidth+'px';
+				$(container).style.margin="0 auto";
+				//console.log(Colls);
+				var firstCollArr=[];
+				var minheight=0;
+				var minIndex;
+				for(let i=0;i<$$(box).length;i++){
+					//console.log($$(box)[i].offsetHeight);
+					if(i<Colls){
+						firstCollArr.push($$(box)[i].offsetHeight);
+					}else{
+						minheight=Math.min.apply(this,firstCollArr);
+						minIndex=getMinIndex(firstCollArr,minheight);
+						$$(box)[i].style.position="absolute";
+						$$(box)[i].style.left=minIndex*$$(box)[0].offsetWidth+'px';
+						$$(box)[i].style.top=minheight+'px';
+						firstCollArr[minIndex]+=$$(box)[i].offsetHeight;
+					}
+				}
+				//console.log(firstCollArr,minheight,minIndex,$$(box)[0].offsetWidth);
+				
+				
+			});
+			
+		}
+		function getMinIndex(arr,min){
+			for(var i=0;i<arr.length;i++){
+				if(arr[i]==min){
+					return i;
+				}
+			}
+		}
+		function loadUsers(callback) {
+            var xhr=new XMLHttpRequest();
+            xhr.open("GET","test.js",true);
+            xhr.onload=function () {
+                var users=JSON.parse(this.responseText);
+                var output='';
+				console.log(users.result);
+                for(var i in users.result)
+                {
+                	output+=
+                		`<div class="box">
+                			<div class="box_img">
+                				<img src="${users.result[i].pic}" alt="">
+                			</div>
+                		</div>`
+                }
+				callback(output);
+				<!-- callback(output); -->
+               <!-- $("container").innerHTML+=output; -->
+            };
+            xhr.send();
+        }
+		function goonload(){
+			var changescroll=window.pageYOffset || document.documentElement.scrollTop;
+			<!-- console.log(changescroll); -->
+			var lastBox=$$("box")[$$("box").length-1];
+			var lastBoxY=lastBox.offsetTop;
+			var lastBoxMidH=lastBox.offsetHeight/2;
+			var screenW=document.body.clientHeight || document.documentElement.clientHeight;
+			console.log(changescroll,lastBoxY,lastBoxMidH,screenW);
+			return changescroll+screenW>lastBoxY+lastBoxMidH;
+			<!-- console.log(lastBox); -->
+		}
+		
+		
+		window.onresize = function(){
+            pbl("container","box");
+        }//浏览器宽度改变监测
+		window.onload=function(){
+			<!-- loadUsers(); -->
+			pbl("container","box");
+			
+			window.onscroll=function(){
+				if(goonload()){
+					console.log(22);
+					<!-- loadUsers(); -->
+					pbl("container","box");
+				}
+			}
+			
+		}
+	</script>
+</html>
